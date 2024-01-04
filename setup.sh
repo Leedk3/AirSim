@@ -50,7 +50,7 @@ else #linux
         software-properties-common \
         wget \
         libvulkan1 \
-        vulkan-utils
+        vulkan-tools
 
     #install clang and build tools
     VERSION=$(lsb_release -rs | cut -d. -f1)
@@ -60,7 +60,7 @@ else #linux
         wget -O - http://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
         sudo apt-get update
     fi
-    sudo apt-get install -y clang-8 clang++-8 libc++-8-dev libc++abi-8-dev
+    sudo apt-get install -y clang-14 clang++-14 libc++-14-dev libc++abi-14-dev
 fi
 
 if ! which cmake; then
@@ -99,13 +99,13 @@ else #linux
     if version_less_than_equal_to "$cmake_ver" "$MIN_CMAKE_VERSION"; then
         # in ubuntu 18 docker CI, avoid building cmake from scratch to save time
         # ref: https://apt.kitware.com/
-        if [ "$(lsb_release -rs)" == "18.04" ]; then
+        if [ "$(lsb_release -rs)" == "22.04" ]; then
             sudo apt-get -y install \
                 apt-transport-https \
                 ca-certificates \
                 gnupg
             wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | sudo tee /etc/apt/trusted.gpg.d/kitware.gpg >/dev/null
-            sudo apt-add-repository 'deb https://apt.kitware.com/ubuntu/ bionic main'
+            sudo apt-add-repository 'deb https://apt.kitware.com/ubuntu/ jammy main'
             sudo apt-get -y install --no-install-recommends \
                 make \
                 cmake
