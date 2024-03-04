@@ -6,7 +6,17 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y --no-ins
 	rsync \
     sudo \
     wget \
-    x11-xserver-utils
+    x11-xserver-utils \
+	mesa-vulkan-drivers
+
+# Install VSCode
+RUN apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y software-properties-common apt-transport-https wget && \
+    wget -q https://packages.microsoft.com/keys/microsoft.asc -O- | sudo apt-key add - && \
+    add-apt-repository "deb [arch=amd64] https://packages.microsoft.com/repos/vscode stable main" && \
+    apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y code
+
 
 RUN echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers && \
     adduser ue4 sudo 

@@ -1,0 +1,1 @@
+python3 build_airsim_image.py --source --base_image adamrehn/ue4-minimal:5.2.0-opengl-ubuntu22.04 --target_image=airsim_source:5.2.0-opengl-ubuntu22.04
