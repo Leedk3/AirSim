@@ -1,4 +1,4 @@
-ARG BASE_IMAGE=adamrehn/ue4-engine:4.19.2-cudagl10.0
+ARG BASE_IMAGE=adamrehn/ue4-minimal:5.2.0-opengl-ubuntu22.04
 FROM $BASE_IMAGE
 
 USER root
@@ -13,7 +13,7 @@ RUN echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers && \
 
 USER ue4
 RUN cd /home/ue4 && \
-	git clone --progress https://github.com/Microsoft/AirSim.git && \
+	git clone --progress -b jammy-22.04 https://github.com/Leedk3/AirSim.git && \
 	cd AirSim && \
 	./setup.sh && \
 	./build.sh
