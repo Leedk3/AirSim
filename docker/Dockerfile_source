@@ -7,7 +7,24 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y --no-ins
     sudo \
     wget \
     x11-xserver-utils \
-	mesa-vulkan-drivers
+	mesa-vulkan-drivers \
+	tmux \
+	tmuxp \
+	terminator \
+	nano\
+	libglm-dev\
+	build-essential         \
+	libeigen3-dev           \
+	libjsoncpp-dev          \
+	libspdlog-dev           \
+	libcurl4-openssl-dev    \
+	cmake\
+	net-tools\
+	libgoogle-glog-dev\
+	libfmt-dev\
+	libyaml-cpp-dev\
+	libpugixml-dev \
+	libftgl-dev 
 
 # Install VSCode
 RUN apt-get update && \
@@ -22,6 +39,7 @@ RUN echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers && \
     adduser ue4 sudo 
 
 USER ue4
+
 RUN cd /home/ue4 && \
 	git clone --progress -b jammy-22.04 https://github.com/Leedk3/AirSim.git && \
 	cd AirSim && \
