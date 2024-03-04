@@ -28,4 +28,7 @@ RUN cd /home/ue4 && \
 	./setup.sh && \
 	./build.sh
 
+# RUN cd /home/ue4 && \
+# 	git clone --progress https://github.com/CodexLabsLLC/Colosseum.git
+
 WORKDIR /home/ue4

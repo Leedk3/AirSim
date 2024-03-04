@@ -226,10 +226,10 @@ void ASimModeBase::initializeTimeOfDay()
         static const FName sun_prop_name(TEXT("Directional light actor"));
         auto* p = sky_sphere_class_->FindPropertyByName(sun_prop_name);
 
-#if ENGINE_MINOR_VERSION > 24
+#if ((ENGINE_MAJOR_VERSION > 4) || (ENGINE_MAJOR_VERSION == 4 && ENGINE_MINOR_VERSION >= 27))
         FObjectProperty* sun_prop = CastFieldChecked<FObjectProperty>(p);
 #else
-        UObjectProperty* sun_prop = Cast<UObjectProperty>(p);
+        FObjectProperty* sun_prop = Cast<FObjectProperty>(p);
 #endif
 
         UObject* sun_obj = sun_prop->GetObjectPropertyValue_InContainer(sky_sphere_);
@@ -310,6 +310,13 @@ void ASimModeBase::setWind(const msr::airlib::Vector3r& wind) const
     // should be overridden by derived class
     unused(wind);
     throw std::domain_error("setWind not implemented by SimMode");
+}
+
+void ASimModeBase::setExtForce(const msr::airlib::Vector3r& ext_force) const
+{
+    // should be overridden by derived class
+    unused(ext_force);
+    throw std::domain_error("setExtForce not implemented by SimMode");
 }
 
 std::unique_ptr<msr::airlib::ApiServerBase> ASimModeBase::createApiServer() const
@@ -838,11 +845,10 @@ void ASimModeBase::drawLidarDebugPoints()
 
                         FVector uu_point;
 
-                        if (lidar->getParams().data_frame == AirSimSettings::kVehicleInertialFrame) {
+                        if (lidar->getParams().data_frame == AirSimSettings::LidarSetting::DataFrame::VehicleInertialFrame) {
                             uu_point = pawn_sim_api->getNedTransform().fromLocalNed(point);
                         }
-                        else if (lidar->getParams().data_frame == AirSimSettings::kSensorLocalFrame) {
-
+                        else if (lidar->getParams().data_frame == AirSimSettings::LidarSetting::DataFrame::SensorLocalFrame) {
                             Vector3r point_w = VectorMath::transformToWorldFrame(point, lidar_data.pose, true);
                             uu_point = pawn_sim_api->getNedTransform().fromLocalNed(point_w);
                         }

@@ -23,9 +23,10 @@
 #include <exception>
 #include "common/common_utils/Utils.hpp"
 #include "Modules/ModuleManager.h"
-#include "ARFilter.h"
-#include "AssetRegistryModule.h"
+#include "AssetRegistry/ARFilter.h"
+#include "AssetRegistry/AssetRegistryModule.h"
 #include "DetectionComponent.h"
+#include "CineCameraComponent.h"
 
 /*
 //TODO: change naming conventions to same as other files?
@@ -239,8 +240,8 @@ void UAirBlueprintLib::GenerateAssetRegistryMap(const UObject* context, TMap<FSt
 {
     UAirBlueprintLib::RunCommandOnGameThread([context, &asset_map]() {
         FARFilter Filter;
-        Filter.ClassNames.Add(UStaticMesh::StaticClass()->GetFName());
-        Filter.ClassNames.Add(UBlueprint::StaticClass()->GetFName());
+        Filter.ClassPaths.Add(UStaticMesh::StaticClass()->GetClassPathName());
+        Filter.ClassPaths.Add(UBlueprint::StaticClass()->GetClassPathName());
         Filter.bRecursivePaths = true;
 
         auto world = context->GetWorld();
@@ -317,6 +318,7 @@ template UStaticMeshComponent* UAirBlueprintLib::GetActorComponent(AActor*, FStr
 template URotatingMovementComponent* UAirBlueprintLib::GetActorComponent(AActor*, FString);
 template UCameraComponent* UAirBlueprintLib::GetActorComponent(AActor*, FString);
 template UDetectionComponent* UAirBlueprintLib::GetActorComponent(AActor*, FString);
+template UCineCameraComponent* UAirBlueprintLib::GetActorComponent(AActor*, FString);
 
 bool UAirBlueprintLib::IsInGameThread()
 {
@@ -492,9 +494,9 @@ std::vector<msr::airlib::MeshPositionVertexBuffersResponse> UAirBlueprintLib::Ge
             ENQUEUE_RENDER_COMMAND(GetVertexBuffer)
             (
                 [vertex_buffer, data](FRHICommandListImmediate& RHICmdList) {
-                    FVector* indices = (FVector*)RHILockVertexBuffer(vertex_buffer->VertexBufferRHI, 0, vertex_buffer->VertexBufferRHI->GetSize(), RLM_ReadOnly);
+                    FVector* indices = (FVector*)RHILockBuffer(vertex_buffer->VertexBufferRHI, 0, vertex_buffer->VertexBufferRHI->GetSize(), RLM_ReadOnly);
                     memcpy(data, indices, vertex_buffer->VertexBufferRHI->GetSize());
-                    RHIUnlockVertexBuffer(vertex_buffer->VertexBufferRHI);
+                    RHIUnlockBuffer(vertex_buffer->VertexBufferRHI);
                 });
 
 #if ((ENGINE_MAJOR_VERSION > 4) || (ENGINE_MAJOR_VERSION == 4 && ENGINE_MINOR_VERSION >= 27))
@@ -514,9 +516,9 @@ std::vector<msr::airlib::MeshPositionVertexBuffersResponse> UAirBlueprintLib::Ge
                 ENQUEUE_RENDER_COMMAND(GetIndexBuffer)
                 (
                     [IndexBuffer, data_ptr](FRHICommandListImmediate& RHICmdList) {
-                        uint16_t* indices = (uint16_t*)RHILockIndexBuffer(IndexBuffer->IndexBufferRHI, 0, IndexBuffer->IndexBufferRHI->GetSize(), RLM_ReadOnly);
+                        uint16_t* indices = (uint16_t*)RHILockBuffer(IndexBuffer->IndexBufferRHI, 0, IndexBuffer->IndexBufferRHI->GetSize(), RLM_ReadOnly);
                         memcpy(data_ptr, indices, IndexBuffer->IndexBufferRHI->GetSize());
-                        RHIUnlockIndexBuffer(IndexBuffer->IndexBufferRHI);
+                        RHIUnlockBuffer(IndexBuffer->IndexBufferRHI);
                     });
 
                 //Need to force the render command to go through cause on the next iteration the buffer no longer exists
@@ -537,9 +539,9 @@ std::vector<msr::airlib::MeshPositionVertexBuffersResponse> UAirBlueprintLib::Ge
                 ENQUEUE_RENDER_COMMAND(GetIndexBuffer)
                 (
                     [IndexBuffer, data_ptr](FRHICommandListImmediate& RHICmdList) {
-                        uint32_t* indices = (uint32_t*)RHILockIndexBuffer(IndexBuffer->IndexBufferRHI, 0, IndexBuffer->IndexBufferRHI->GetSize(), RLM_ReadOnly);
+                        uint32_t* indices = (uint32_t*)RHILockBuffer(IndexBuffer->IndexBufferRHI, 0, IndexBuffer->IndexBufferRHI->GetSize(), RLM_ReadOnly);
                         memcpy(data_ptr, indices, IndexBuffer->IndexBufferRHI->GetSize());
-                        RHIUnlockIndexBuffer(IndexBuffer->IndexBufferRHI);
+                        RHIUnlockBuffer(IndexBuffer->IndexBufferRHI);
                     });
 
                 FlushRenderingCommands();
