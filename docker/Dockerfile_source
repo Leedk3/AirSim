@@ -24,7 +24,9 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y --no-ins
 	libfmt-dev\
 	libyaml-cpp-dev\
 	libpugixml-dev \
-	libftgl-dev 
+	libftgl-dev \
+	apt-utils \
+	libboost-all-dev
 
 # Install VSCode
 RUN apt-get update && \
