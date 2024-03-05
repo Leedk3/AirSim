@@ -1,29 +1,17 @@
 ARG BASE_IMAGE=nvidia/cudagl:10.0-devel-ubuntu18.04
 FROM $BASE_IMAGE
 
-RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys A4B469963BF863CC
 RUN DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y --no-install-recommends \
 	python3 \
 	python3-pip \
-	python3-dev \
 	sudo \
 	libglu1-mesa-dev \
 	xdg-user-dirs \
 	pulseaudio \
-	x11-xserver-utils \ 
-	portaudio19-dev \
-	python-pyaudio \
-	python3-pyaudio
+	x11-xserver-utils
 
 RUN python3 -m pip install --upgrade pip && \
     pip3 install setuptools wheel && \
-    pip3 install setuptools msgpack-rpc-python && \
-    pip3 install setuptools numpy && \
-    pip3 install setuptools pyaudio && \
-    pip3 install setuptools opencv-python
-
-
-RUN python3 -m pip install --upgrade pip && \
     pip3 install airsim
 
 RUN adduser --force-badname --disabled-password --gecos '' --shell /bin/bash airsim_user && \

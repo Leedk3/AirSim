@@ -50,7 +50,7 @@ else #linux
         software-properties-common \
         wget \
         libvulkan1 \
-        vulkan-tools
+        vulkan-utils
 
     #install clang and build tools
     VERSION=$(lsb_release -rs | cut -d. -f1)
@@ -60,7 +60,7 @@ else #linux
         wget -O - http://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
         sudo apt-get update
     fi
-    sudo apt-get install -y clang-14 clang++-14 libc++-14-dev libc++abi-14-dev
+    sudo apt-get install -y clang-8 clang++-8 libc++-8-dev libc++abi-8-dev
 fi
 
 if ! which cmake; then
@@ -78,6 +78,10 @@ if [ "$(uname)" == "Darwin" ]; then # osx
         sudo dseditgroup -o edit -a "$(whoami)" -t user dialout
     fi
 
+    # MacOS 11 has new Python env management that breaks the Python 2-to-3
+    # build process. We need to make sure brew updates before attempting to
+    # install, since it will update packaages
+    brew update
     brew_install wget
     brew_install coreutils
 
@@ -99,13 +103,13 @@ else #linux
     if version_less_than_equal_to "$cmake_ver" "$MIN_CMAKE_VERSION"; then
         # in ubuntu 18 docker CI, avoid building cmake from scratch to save time
         # ref: https://apt.kitware.com/
-        if [ "$(lsb_release -rs)" == "22.04" ]; then
+        if [ "$(lsb_release -rs)" == "18.04" ]; then
             sudo apt-get -y install \
                 apt-transport-https \
                 ca-certificates \
                 gnupg
             wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | sudo tee /etc/apt/trusted.gpg.d/kitware.gpg >/dev/null
-            sudo apt-add-repository 'deb https://apt.kitware.com/ubuntu/ jammy main'
+            sudo apt-add-repository 'deb https://apt.kitware.com/ubuntu/ bionic main'
             sudo apt-get -y install --no-install-recommends \
                 make \
                 cmake
@@ -182,7 +186,7 @@ echo "Installing Eigen library..."
 
 if [ ! -d "AirLib/deps/eigen3" ]; then
     echo "Downloading Eigen..."
-    wget -O eigen3.zip https://gitlab.com/libeigen/eigen/-/archive/3.3.7/eigen-3.3.7.zip
+    wget -O eigen3.zip https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.zip
     unzip -q eigen3.zip -d temp_eigen
     mkdir -p AirLib/deps/eigen3
     mv temp_eigen/eigen*/Eigen AirLib/deps/eigen3
