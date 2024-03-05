@@ -60,7 +60,7 @@ else #linux
         wget -O - http://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
         sudo apt-get update
     fi
-    sudo apt-get install -y clang-8 clang++-8 libc++-8-dev libc++abi-8-dev
+    sudo apt-get install -y clang-12 clang++-12 libc++-12-dev libc++abi-12-dev
 fi
 
 if ! which cmake; then
@@ -109,7 +109,7 @@ else #linux
                 ca-certificates \
                 gnupg
             wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | sudo tee /etc/apt/trusted.gpg.d/kitware.gpg >/dev/null
-            sudo apt-add-repository 'deb https://apt.kitware.com/ubuntu/ bionic main'
+            sudo apt-add-repository 'deb https://apt.kitware.com/ubuntu/ jammy main'
             sudo apt-get -y install --no-install-recommends \
                 make \
                 cmake
