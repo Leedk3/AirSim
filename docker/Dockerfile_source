@@ -1,4 +1,4 @@
-ARG BASE_IMAGE=adamrehn/ue4-engine:4.19.2-cudagl10.0
+ARG BASE_IMAGE=adamrehn/ue4-minimal:5.2.0-opengl-ubuntu22.04
 FROM $BASE_IMAGE
 
 USER root
@@ -6,16 +6,48 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y --no-ins
 	rsync \
     sudo \
     wget \
-    x11-xserver-utils
+    x11-xserver-utils \
+	mesa-vulkan-drivers \
+	tmux \
+	terminator \
+	nano\
+	libglm-dev\
+	build-essential         \
+	libeigen3-dev           \
+	libjsoncpp-dev          \
+	libspdlog-dev           \
+	libcurl4-openssl-dev    \
+	cmake\
+	net-tools\
+	libgoogle-glog-dev\
+	libfmt-dev\
+	libyaml-cpp-dev\
+	libpugixml-dev \
+	libftgl-dev \
+	apt-utils \
+	libboost-all-dev
+
+# Install VSCode
+RUN apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y software-properties-common apt-transport-https wget && \
+    wget -q https://packages.microsoft.com/keys/microsoft.asc -O- | sudo apt-key add - && \
+    add-apt-repository "deb [arch=amd64] https://packages.microsoft.com/repos/vscode stable main" && \
+    apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y code
+
 
 RUN echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers && \
     adduser ue4 sudo 
 
 USER ue4
+
 RUN cd /home/ue4 && \
-	git clone --progress https://github.com/Microsoft/AirSim.git && \
+	git clone --progress -b colloseum https://github.com/Leedk3/AirSim.git && \
 	cd AirSim && \
 	./setup.sh && \
 	./build.sh
+
+# RUN cd /home/ue4 && \
+# 	git clone --progress https://github.com/CodexLabsLLC/Colosseum.git
 
 WORKDIR /home/ue4
