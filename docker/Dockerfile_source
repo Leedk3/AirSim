@@ -42,7 +42,7 @@ RUN echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers && \
 USER ue4
 
 RUN cd /home/ue4 && \
-	git clone --progress -b colloseum https://github.com/Leedk3/AirSim.git && \
+	git clone --progress -b colosseum https://github.com/Leedk3/AirSim.git && \
 	cd AirSim && \
 	./setup.sh && \
 	./build.sh
