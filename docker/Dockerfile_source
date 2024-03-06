@@ -1,4 +1,5 @@
 ARG BASE_IMAGE=adamrehn/ue4-minimal:5.2.0-opengl-ubuntu22.04
+ARG ROS_DISTRO=humble
 FROM $BASE_IMAGE
 
 USER root
@@ -25,7 +26,10 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y --no-ins
 	libpugixml-dev \
 	libftgl-dev \
 	apt-utils \
-	libboost-all-dev
+	libboost-all-dev \
+	locales \
+	software-properties-common \
+	curl
 
 # Install VSCode
 RUN apt-get update && \
@@ -36,10 +40,90 @@ RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y code
 
 
+RUN add-apt-repository universe
+RUN curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -o /usr/share/keyrings/ros-archive-keyring.gpg
+
+# Setup of the locale
+RUN locale-gen en_US en_US.UTF-8 \
+    && update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8 \
+    && export LANG=en_US.UTF-8
+
+# Add key
+RUN echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu $(. /etc/os-release && echo $UBUNTU_CODENAME) main" | sudo tee /etc/apt/sources.list.d/ros2.list > /dev/null
+
+# RUN curl http://repo.ros2.org/repos.key | apt-key add -
+# RUN sh -c 'echo "deb [arch=amd64,arm64] http:packages.ros.org/ros2/ubuntu `lsb_release -cs` main" > /etc/apt/sources.list.d/ros2-latest.list' \
+#     && apt update
+
+# Install ROS2
+# RUN DEBIAN_FRONTEND=noninteractive apt-get update && apt install -y --no-install-recommends \ 
+# 				python3-flake8-docstrings \
+# 				python3-pip \
+# 				python3-pytest-cov \
+# 				ros-dev-tools \
+# 				python3-flake8-blind-except \
+# 				python3-flake8-builtins \
+# 				python3-flake8-class-newline \
+# 				python3-flake8-comprehensions \
+# 				python3-flake8-deprecated \
+# 				python3-flake8-import-order \
+# 				python3-flake8-quotes \
+# 				python3-pytest-repeat \
+# 				python3-pytest-rerunfailures \
+# 				python3-vcstool \
+#     && rm -rf /var/lib/apt/lists/*rm 
+
+COPY ros2-packages /tmp/
+RUN apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get -y dist-upgrade && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y gettext-base && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y \
+        $(cat /tmp/ros2-packages | cut -d# -f1 | envsubst) \
+    && rm -rf /var/lib/apt/lists/* /tmp/ros2-packages \
+    && apt-get clean
+
+RUN apt -y upgrade && rosdep init
+
+# RUN DEBIAN_FRONTEND=noninteractive apt-get update && apt install -y --no-install-recommends \ 
+# 				python3-flake8-docstrings \
+# 				python3-pip \
+# 				python3-pytest-cov \
+# 				ros-dev-tools \
+# 				python3-flake8-blind-except \
+# 				python3-flake8-builtins \
+# 				python3-flake8-class-newline \
+# 				python3-flake8-comprehensions \
+# 				python3-flake8-deprecated \
+# 				python3-flake8-import-order \
+# 				python3-flake8-quotes \
+# 				python3-pytest-repeat \
+# 				python3-pytest-rerunfailures \
+# 				python3-vcstool \
+#     && rm -rf /var/lib/apt/lists/*rm 
+
+# RUN	/ros2_humble/ && colcon build --symlink-install
+
+# # Setup scripts
+# RUN echo "source /opt/ros/$ROS_DISTRO/setup.bash" >> /root/.bashrc
+
+# # Set the entry point
+# COPY ./ros_entrypoint.sh /
+# RUN chmod +x /ros_entrypoint.sh
+
 RUN echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers && \
     adduser ue4 sudo 
 
 USER ue4
+
+# RUN mkdir -p /home/ue4/ros2_humble/src && \ 
+# 	cd /home/ue4/ros2_humble && \
+#  	vcs import --input https://raw.githubusercontent.com/ros2/ros2/humble/ros2.repos src
+
+
+# RUN	cd /home/ue4/ros2_humble && \
+# 	rosdep update && \
+# 	rosdep install --from-paths src --ignore-src -y --skip-keys "fastcdr rti-connext-dds-6.0.1 urdfdom_headers"
+	# RUN	/ros2_humble/ && colcon build --symlink-install
 
 RUN cd /home/ue4 && \
 	git clone --progress -b colosseum https://github.com/Leedk3/AirSim.git && \
@@ -51,3 +135,6 @@ RUN cd /home/ue4 && \
 # 	git clone --progress https://github.com/CodexLabsLLC/Colosseum.git
 
 WORKDIR /home/ue4
+
+# ENTRYPOINT ["/ros_entrypoint.sh"]
+CMD ["bash"]
