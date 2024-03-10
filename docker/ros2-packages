@@ -42,6 +42,6 @@ ros-humble-diagnostic-updater
 
 ros-humble-cv-bridge
 ros-humble-geodesy
-ros-humble-mavros-msgs
+ros-humble-mavros*
 
 
