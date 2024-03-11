@@ -131,6 +131,36 @@ RUN cd /home/ue4 && \
 	./setup.sh && \
 	./build.sh
 
+
+# For cesium plugin
+# https://github.com/CesiumGS/cesium-unreal/blob/main/Documentation/developer-setup-linux.md
+ENV UNREAL_ENGINE_DIR=/home/ue4/UnrealEngine
+ENV UNREAL_ENGINE_COMPILER_DIR=$UNREAL_ENGINE_DIR/Engine/Extras/ThirdPartyNotUE/SDKs/HostLinux/Linux_x64/v21_clang-15.0.1-centos7/x86_64-unknown-linux-gnu
+ENV UNREAL_ENGINE_LIBCXX_DIR=$UNREAL_ENGINE_DIR/Engine/Source/ThirdParty/Unix/LibCxx
+
+RUN cd /home/ue4 && mkdir dev && \
+	cd /home/ue4/dev && git clone -b ue51up --recursive https://github.com/CesiumGS/cesium-unreal.git && \
+	cd /home/ue4/dev/cesium-unreal && git submodule update --init --recursive
+
+RUN	cd /home/ue4/dev/cesium-unreal/extern && \
+	cmake -B build -S . -DCMAKE_TOOLCHAIN_FILE="unreal-linux-toolchain.cmake" -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DCMAKE_BUILD_TYPE=Release && \
+	cmake --build build --target install
+
+#KTX-Software workaround
+RUN cd /home/ue4/dev/cesium-unreal && mv extern /tmp
+
+ENV CESIUM_FOR_UNREAL_DIR=/home/ue4/dev/cesium-unreal
+RUN echo 'export CESIUM_FOR_UNREAL_DIR=/home/ue4/dev/cesium-unreal' >> /home/ue4/.bashrc
+
+RUN cd $UNREAL_ENGINE_DIR/Engine/Build/BatchFiles && \
+	./RunUAT.sh BuildPlugin -Plugin="$CESIUM_FOR_UNREAL_DIR/CesiumForUnreal.uplugin" -Package="$CESIUM_FOR_UNREAL_DIR/../packages/CesiumForUnreal" -CreateSubFolder -TargetPlatforms=Linux
+
+RUN mkdir -p $UNREAL_ENGINE_DIR/Engine/Plugins/Marketplace && \
+	cp -r $CESIUM_FOR_UNREAL_DIR/../packages/CesiumForUnreal $UNREAL_ENGINE_DIR/Engine/Plugins/Marketplace/
+
+RUN cd /home/ue4/dev && \
+	git clone https://github.com/CesiumGS/cesium-unreal-samples.git
+
 # RUN cd /home/ue4 && \
 # 	git clone --progress https://github.com/CodexLabsLLC/Colosseum.git
 
