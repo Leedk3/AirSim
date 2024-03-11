@@ -89,7 +89,8 @@ HOSTNAME=$(whoami)
 
 # docker arguments
 DOCKER_ARGS=(
-  -v "${AIRSIM_DIR}/":"/home/ue4/AirSim/":z
+  -v "${AIRSIM_DIR}/ros2/":"/home/ue4/AirSim/ros2/":z
+  -v "${AIRSIM_DIR}/Documents/":"/home/ue4/Documents/":z
 
   --runtime nvidia
   --network host
